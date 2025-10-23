@@ -1,6 +1,6 @@
 name: mte_relay_client_plugin
 description: "A Flutter Plugin, implementing the Eclypses AWS MteRelay Client."
-version: 4.2.15
+version: 4.2.16
 homepage: https://github.com/Eclypses/mte-relay-client-flutter-pod
 
 environment:
@@ -24,6 +24,5 @@ flutter:
         pluginClass: MteRelayClientPlugin
       ios:
         pluginClass: MteRelayClientPlugin
-        # Tell Flutter to always use CocoaPods for this plugin
-        swift_package_manager: false
+
 

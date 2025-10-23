@@ -1,0 +1,36 @@
+PODS:
+  - Flutter (3.13.0)
+  - mte_relay_client_plugin (4.2.11):
+    - Flutter
+    - MteRelay (~> 4.4)
+  - MteRelay (4.4.0)
+
+DEPENDENCIES:
+  - Flutter
+  - mte_relay_client_plugin (from `../../ios/mte_relay_client_plugin`)
+  - MteRelay (from `https://github.com/Eclypses/mte-relay-client-ios.git`, tag `4.4.0`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - Flutter
+
+EXTERNAL SOURCES:
+  mte_relay_client_plugin:
+    :path: "../../ios/mte_relay_client_plugin"
+  MteRelay:
+    :git: https://github.com/Eclypses/mte-relay-client-ios.git
+    :tag: 4.4.0
+
+CHECKOUT OPTIONS:
+  MteRelay:
+    :git: https://github.com/Eclypses/mte-relay-client-ios.git
+    :tag: 4.4.0
+
+SPEC CHECKSUMS:
+  Flutter: 8ff16720b007bae16abfe75ef9fe3ee45ead486a
+  mte_relay_client_plugin: 4df4b3616f1e5201b1bc2419e9d3ca81f0c57155
+  MteRelay: 6cb98260f95a616d6a949d4a96ba6bbf58011536
+
+PODFILE CHECKSUM: b1c196a44823d93a73edeebebf8e4a344de31d75
+
+COCOAPODS: 1.16.2

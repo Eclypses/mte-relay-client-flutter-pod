@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'mte_relay_client_plugin'
-  s.version          = '4.2.11'
+  s.version          = '4.2.14'
   s.summary          = 'Flutter plugin for Eclypses MTE Relay Client'
   s.description      = <<-DESC
                         Flutter plugin for the Eclypses MteRelay Client.
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT', :text => 'See LICENSE in repo' }
   s.author           = { 'Eclypses' => 'support@eclypses.com' }
 
-  s.platform         = :ios, '14.0'
+  s.platform         = :ios, '16.0'
   s.swift_versions   = ['5.7', '5.8', '5.9']
 
   s.source           = { :git => 'https://github.com/Eclypses/mte-relay-client-flutter-pod.git', :tag => s.version.to_s }
@@ -25,5 +25,5 @@ Pod::Spec.new do |s|
   # Flutter integration (lets CocoaPods know it’s a Flutter plugin)
   s.dependency 'Flutter'
 
-  s.ios.deployment_target = '14.0'
+  s.ios.deployment_target = '16.0'
 end

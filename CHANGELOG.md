@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.3.1] - 2025-11-3
+
+### Added 
+    
+### Changed
+- Updated README.md and iosIntegrationGuide.md
+
+[4.3.1]: https://github.com/mte-relay-client-ios/releases/tag/4.3.1
+
 ## [4.3.0] - 2025-11-1
 
 ### Added 

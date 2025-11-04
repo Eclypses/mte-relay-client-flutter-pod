@@ -59,7 +59,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var relayServerUrl = "https://aws-relay-server-demo.eclypses.com";
-  // var relayServerUrl = "http://10.0.0.219:8080";
 
   String responseMessage = 'Awaiting response...';
   final _mteRelayClientPlugin = MteRelayClientPlugin();

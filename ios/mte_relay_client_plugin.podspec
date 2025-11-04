@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'mte_relay_client_plugin'
-  s.version          = '4.3.0'
+  s.version          = '4.3.1'
   s.summary          = 'Flutter plugin for Eclypses MTE Relay Client'
   s.description      = <<-DESC
                         Flutter plugin for the Eclypses MteRelay Client.

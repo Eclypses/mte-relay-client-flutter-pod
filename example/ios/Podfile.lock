@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - mte_relay_client_plugin (4.3.0):
+  - mte_relay_client_plugin (4.3.1):
     - Flutter
     - MteRelay (~> 4.4)
   - MteRelay (4.4.7)
@@ -26,9 +26,9 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  mte_relay_client_plugin: 8a9463375c82d7f34fe93b72b814d23a16cfb3ea
+  mte_relay_client_plugin: 758c3813bd5a5c64020db1b78f57ae9f06f7e8ce
   MteRelay: 2e0eb6ab121610d24a945514057ba6ed2ebce3f4
 
-PODFILE CHECKSUM: a376c263d9b4fab09219a2b1b0e450097461cc62
+PODFILE CHECKSUM: 2a952bb1f8db25decbae76601245113f10d84c43
 
 COCOAPODS: 1.16.2

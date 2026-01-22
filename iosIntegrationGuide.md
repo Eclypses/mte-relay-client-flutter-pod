@@ -1,8 +1,27 @@
-# MTE Relay Client Flutter Plugin (CocoaPods Integration)
+<center>
+<img src="Eclypses.png" style="width:50%;" alt="Eclypses Logo"/>
+</center>
 
-This guide details how to integrate the MTE Relay Client Flutter Plugin, which is specifically designed for CocoaPods-based iOS development.
+<div align="center" style="font-size:30pt; font-weight:900; font-family:arial; margin-top:50px;" >
+MTE Relay Client Flutter Plugin (CocoaPods Integration) </div>
+<br>
 
-**Note:** If your iOS project supports Swift Package Manager, we recommend using the alternative plugin available at [https://github.com/Eclypses/mte-relay-client-flutter.git](https://github.com/Eclypses/mte-relay-client-flutter.git) for a potentially simpler setup.
+This guide provides detailed iOS setup instructions for the MTE Relay Client Flutter Plugin using CocoaPods.
+
+**Note:** If your iOS project supports Swift Package Manager, consider using the alternative plugin at [mte-relay-client-flutter.git](https://github.com/Eclypses/mte-relay-client-flutter.git) for simpler setup.
+
+---
+
+## 📑 Table of Contents
+
+- [Quick Start Guide](#-quick-start-guide)
+- [Prerequisites](#-prerequisites)
+- [Setup Steps](#️-setup-steps)
+- [Post-Installation: Xcode Configuration](#-post-installation-xcode-configuration)
+- [Verification](#-verification)
+- [Debugging Tips](#debugging-tips)
+- [Apple Silicon (M1/M2/M3) Macs](#-apple-silicon-m1m2m3-macs)
+- [Android Setup](#-android-setup-note)
 
 ---
 
@@ -33,7 +52,9 @@ dependencies:
       ref: 4.3.1 # Use the specific tag for the desired plugin version
 ```
 
-**Explanation:** This tells Flutter to fetch your plugin directly from its Git repository at the specified tag.
+**Explanation:** This tells Flutter to fetch the plugin directly from its Git repository at the specified tag.
+
+> 💡 **Version Note:** The Flutter plugin version (`ref: 4.3.1`) and the iOS native library version (`:tag => '4.4.7'` in Podfile) are versioned independently. Always use the versions specified in this documentation or check the repository releases for compatible version pairs.
 
 #### 2. Update the iOS `Podfile`
 
@@ -113,26 +134,82 @@ end
 
 #### 3. Clean and Rebuild Your Project
 
-Execute these commands from the **root directory of your Flutter project** to ensure all caches are cleared and dependencies are correctly installed:
+Execute these commands from the **root directory of your Flutter project**. Each step is explained:
 
 ```bash
-# 1. Clean Flutter build artifacts
+# Step 1: Remove all Flutter build artifacts (compiled code, caches)
+# This ensures no stale builds interfere with the new setup
 flutter clean
 
-# 2. Fetch Flutter package dependencies (will also update symlinks)
+# Step 2: Download all Flutter/Dart package dependencies
+# This reads your pubspec.yaml and fetches packages including mte_relay_client_plugin
 flutter pub get
 
-# 3. Aggressively remove existing iOS Pods and lock file to ensure a fresh install
-#    (Optional: Add `pod cache clean --all` if issues persist after this step)
+# Step 3: Remove existing CocoaPods installation to force a fresh install
+# - ios/Pods/ contains downloaded pod source code
+# - ios/Podfile.lock records exact versions used (removing forces version re-resolution)
+# TIP: If problems persist, also run: pod cache clean --all
 rm -rf ios/Pods ios/Podfile.lock
 
-# 4. Navigate into the iOS directory, install Pods, and then return to project root
-#    `--repo-update` ensures your local CocoaPods spec repo is up-to-date
+# Step 4: Navigate to iOS folder, install pods with updated specs, return to project root
+# --repo-update ensures your local CocoaPods spec repository has the latest package info
 cd ios && pod install --repo-update && cd ..
 
-# 5. Build your Flutter iOS application
+# Step 5: Build the iOS application
+# This compiles both Flutter and native iOS code
 flutter build ios
 ```
+
+> ⚠️ **Important:** If you encounter persistent issues, try the nuclear option:
+> ```bash
+> pod cache clean --all && rm -rf ios/Pods ios/Podfile.lock && cd ios && pod install --repo-update && cd ..
+> ```
+
+---
+
+## 🛠️ Post-Installation: Xcode Configuration
+
+After running `pod install`, you must use Xcode properly:
+
+### 1. Open the Correct File
+
+**Always open the `.xcworkspace` file**, NOT the `.xcodeproj`:
+
+```bash
+open ios/Runner.xcworkspace
+```
+
+> ❌ **Wrong:** `open ios/Runner.xcodeproj`  
+> ✅ **Correct:** `open ios/Runner.xcworkspace`
+
+Opening the `.xcodeproj` will not include the CocoaPods dependencies, causing build failures.
+
+### 2. Verify Deployment Target
+
+In Xcode:
+1. Click on **Runner** in the Project Navigator (left sidebar)
+2. Select the **Runner** target (not project)
+3. Go to the **General** tab
+4. Ensure **Minimum Deployments > iOS** is set to **16.0** or higher
+
+### 3. Clean Xcode Build (if needed)
+
+If builds still fail after pod installation:
+1. In Xcode: **Product** → **Clean Build Folder** (or ⇧⌘K)
+2. Close Xcode completely
+3. Reopen `Runner.xcworkspace` and build again
+
+---
+
+## ✅ Verification
+
+To confirm the integration was successful:
+
+1. **Run the app** on a simulator or device (iOS 16+)
+2. **Check the console logs** for: `"Relay Initialized"`
+3. **Make a test API call** through the relay
+
+If you see "Relay Initialized" in your debug console, the setup is complete!
 
 ---
 
@@ -147,6 +224,50 @@ flutter build ios
     *   Make sure `pod_target_xcconfig` is properly setting `HEADER_SEARCH_PATHS` to include `Classes/Mte/include`.
 *   **"Mixed language source files; feature not supported" error:**
     *   This error is typically associated with Swift Package Manager and specific target configurations. If encountered in a CocoaPods context with `MteRelay`, ensure your `MteRelay.podspec` correctly lists `s.source_files` paths and that all files it expects to compile are actually Swift, or if mixed, are handled appropriately for CocoaPods' build process.
+
+---
+
+## 🍎 Apple Silicon (M1/M2/M3) Macs
+
+If you're developing on an Apple Silicon Mac and encounter CocoaPods issues:
+
+### Option 1: Run Terminal with Rosetta (Recommended for CocoaPods issues)
+
+```bash
+# Run pod install under x86_64 architecture
+arch -x86_64 pod install --repo-update
+```
+
+### Option 2: Install ffi gem for ARM
+
+If you see errors about `ffi` or `libffi`:
+
+```bash
+sudo arch -x86_64 gem install ffi
+```
+
+### Option 3: Use Terminal with Rosetta Permanently
+
+1. Find Terminal in Applications → Utilities
+2. Right-click → **Get Info**
+3. Check **"Open using Rosetta"**
+4. Restart Terminal
+
+> 💡 **Tip:** Most CocoaPods issues on Apple Silicon are resolved by using Rosetta for the pod installation step only.
+
+---
+
+## 🤖 Android Setup Note
+
+Good news! **Android requires no additional configuration** beyond adding the plugin to your `pubspec.yaml`.
+
+The Android portion of this plugin integrates automatically through Flutter's plugin system. Simply:
+
+1. Add the plugin dependency (as shown in Step 1)
+2. Run `flutter pub get`
+3. Build for Android: `flutter build apk` or `flutter build appbundle`
+
+No Gradle modifications or manual native library setup required.
 
 ---
 

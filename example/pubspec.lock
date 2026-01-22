@@ -89,9 +89,11 @@ packages:
   mte_relay_client_plugin:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
+      path: "."
+      ref: "4.3.1"
+      resolved-ref: "6ecf502d19c10efa9aa20b2206d5620d3ab772ca"
+      url: "https://github.com/Eclypses/mte-relay-client-flutter-pod.git"
+    source: git
     version: "4.3.1"
   path:
     dependency: transitive

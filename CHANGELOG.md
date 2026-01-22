@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+-
+
+### Changed
+-
+
+### Fixed
+-
+
+
+## [4.4.0] - 2026-01-21
+
+### Added
+- Added dev_docs directory
+- Added release.sh script
+
+### Changed
+- Updated README and iosIntegrationGuide markdown files
+
+### Fixed
+- Added 'v' prefix to version number
+
+
 ## [4.3.1] - 2025-11-3
 
 ### Added 
@@ -24,3 +49,5 @@ All notable changes to this project will be documented in this file.
 Initial version of this Plugin. This plugin was copied from https://github.com/Eclypses/eclypses-aws-mte-relay-client-ios/releases/tag/4.2.18 and edited to enable implementation as a CocoaPod as well as Swift Package
 
 
+
+[4.4.0]: https://github.com/Eclypses/mte-relay-client-flutter-pod/releases/tag/v4.4.0

@@ -1,12 +1,24 @@
 <center>
-<img src="Eclypses.png" style="width:50%;"/>
+<img src="Eclypses.png" style="width:50%;" alt="Eclypses Logo"/>
 </center>
 
 <div align="center" style="font-size:40pt; font-weight:900; font-family:arial; margin-top:50px;" >
-MteRelay Client Flutter Plugin </div>
-<br><br>
+MteRelay Client Flutter Plugin (CocoaPods) </div>
+<br>
 
-### This Flutter plugin provides plug-and-play MTE integration for iOS/Swift and Android/Java Flutter applications, allowing quick integration with very minimal code changes. This Client Plugin requires a corresponding MteRelay Server API to receive the encoded requests and relay them onto the original API. 
+### This Flutter plugin provides plug-and-play MTE integration for iOS/Swift and Android/Java Flutter applications, allowing quick integration with very minimal code changes. This Client Plugin requires a corresponding MteRelay Server API to receive the encoded requests and relay them onto the original API.
+
+---
+
+## 📑 Table of Contents
+
+- [Overview](#overview)
+- [Before You Begin](#before-you-begin)
+- [Add MteRelay Client Flutter Plugin to your application](#add-mterelay-client-flutter-plugin-to-your-application)
+- [Response Handling](#response-handling)
+- [API Reference](#api-reference)
+- [Troubleshooting](#troubleshooting)
+- [Contact Eclypses](#contact-eclypses) 
 <br><br>
 
 ## Overview 
@@ -23,33 +35,76 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-<br><br>
-## Add MteRelay Client Flutter Plugin to your application:
-- Confirm set-up of corresponding MteRelay API to receive the requests from your application, where they will be decoded and relayed on to the original destination API.
-- Add this [Mte-Relay-Client-Flutter](https://github.com/Eclypses/mte-relay-client-flutter.git) -  [HowTo](https://docs.flutter.dev/packages-and-plugins/using-packages). 
-  - Currently, this MteRelay Client Flutter Plugin is not published on pub.dev so add this plugin by editing your pubspec.yaml file as shown here. (Indenting is critical!)
-``` dart
+<br>
+
+## Before You Begin
+
+Ensure you have the following ready before integrating this plugin:
+
+- [ ] **MteRelay Server Access** - A running MteRelay server instance with your server URL
+- [ ] **Flutter SDK** - Latest stable version installed (`flutter --version` to check)
+- [ ] **Xcode** - Latest version for iOS development (macOS only)
+- [ ] **CocoaPods** - Installed and updated (`sudo gem install cocoapods`)
+- [ ] **Android Studio** - For Android development with SDK tools installed
+
+> 💡 **Tip:** Run `flutter doctor` to verify your development environment is properly configured.
+
+<br>
+
+## Add MteRelay Client Flutter Plugin to your application
+
+### Step 1: Add the Plugin Dependency
+
+This MteRelay Client Flutter Plugin is not published on pub.dev. Add it directly from GitHub by editing your `pubspec.yaml` file:
+
+> ⚠️ **Important:** YAML indentation is critical! Use exactly 2 or 4 spaces (be consistent), never tabs.
+
+```yaml
 dependencies:
-    flutter:
-        sdk: flutter
-    mte_relay_client_plugin:
-        git:
-            url: https://github.com/Eclypses/mte-relay-client-flutter.git
-            ref: 4.3.1
+  flutter:
+    sdk: flutter
+  mte_relay_client_plugin:
+    git:
+      url: https://github.com/Eclypses/mte-relay-client-flutter-pod.git
+      ref: 4.3.1
 ```
 
-NOTE - Compiling Example project for an iOS device or simulator requires targeting iOS version 16 or greater.
+> ⚠️ **iOS Requirement:** This plugin requires iOS 16.0 or greater. See the [iOS Integration Guide](iosIntegrationGuide.md) for detailed CocoaPods setup instructions.
 
-- In a terminal at the root directory of the project, run Flutter pub get. This should install the MteRelay Client Plugin to your project. 
-- In the file where you expect to maintain the reference to the MteRelay plugin, import it. 
+### Step 2: Install Dependencies
+
+In a terminal at the root directory of your project:
+
+```bash
+flutter pub get
+```
+
+This downloads the MteRelay Client Plugin to your project.
+
+### Step 3: Import the Plugin
+
+In the file where you'll use the MteRelay plugin, add these imports:
+
 ```dart
+import 'dart:convert';           // For JSON encoding/decoding
+import 'dart:typed_data';        // For Uint8List handling
+import 'package:flutter/services.dart';  // For PlatformException
 import 'package:mte_relay_client_plugin/mte_relay_client_plugin.dart';
+import 'package:mte_relay_client_plugin/mte_relay_response_model.dart';
+import 'package:mte_relay_client_plugin/mte_relay_native_response.dart';
 ```
-- Create a class-level variable to store the reference to the plugin.
+
+### Step 4: Create a Plugin Instance
+
+Create a class-level variable to store the reference to the plugin:
+
 ```dart
 final _mteRelayClientPlugin = MteRelayClientPlugin();   
 ```
-- Then, when the class is instantiated, set up the Relay Callbacks and initialize the Relay.
+
+### Step 5: Initialize the Relay
+
+When your class is instantiated, set up the Relay callbacks and initialize the Relay.
 
 ```dart
 @override
@@ -116,206 +171,307 @@ final _mteRelayClientPlugin = MteRelayClientPlugin();
   }
 ```
 
-5. Create arguments and make call to Plugin method
+### Step 6: Make API Calls
+
+Create arguments and call Plugin methods. Here's a sample POST request:
+
 ```dart
 // This is a sample POST request
 Future<void> login() async {
-    final body = jsonEncode({"email": "email.com", "password": "password!"});
+    final body = jsonEncode({"email": "user@example.com", "password": "password!"});
+    
+    // Define which headers should be encrypted (Content-Type is always encrypted if present)
+    final headersToEncrypt = ['Content-Type', 'Authorization'];
+    
     try {
       final dynamic args = {
-        'url': "<yourServerUrlString>",
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-        'route': "/api/login", // route will be encrypted
+        'url': "https://your-relay-server.com",  // Your MteRelay server URL
+        'pathnamePrefix': null,  // Optional: Use a string like "/api/v1" if your architecture requires an unencrypted prefix
+        'route': "/api/login",   // This route WILL be encrypted
         'method': 'POST',
-        'route': "/api/login",
         'headers': {'Content-Type': 'application/json'},
-        'headersToEncrypt': headersToEncrypt, // Any headers you wish to be encrypted. Content-Type is always encrypted, if it exists.
+        'headersToEncrypt': headersToEncrypt,
         'body': body,
       };
        Map<dynamic, dynamic> response = await _mteRelayClientPlugin
           .relayDataTask(args);
-
-      // The primary difference between a Result object and NativeHttpResponse object is the body (data element) datatype.
-      // OPTION 1 to handle the responseMap
-      // In this case, the body (result.data) type is 'T?'
-      final result = Result.fromMap(responseMap);
-      if (!result.isSuccess && result.errorMessage != null) {
-        _showResult(result.isSuccess, result.errorMessage!);
-      }
-
-      // If body can be converted to a string
-      // Returns an empty String if data is null or can't be converted to a String
-      final bodyString = result.bodyAsString;
-
-      // If body can be converted to a Json Object. Returns null if it can't be converted.
-      final bodyJson = result.bodyAsJsonObject;
-
-      // OPTION 2 to handle the responseMap
-      // In this case, the body (result.data) type is Uint8List?
-      final nativeResponse = NativeHttpResponse.fromMap(responseMap);
-
-      // If body can be converted to a string
-      // Returns an empty String if data is null or can't be converted to a String
-      final dataString = nativeResponse.bodyAsString;
-
-      // If body can be converted to a Json Object. Returns null if it can't be converted.
-      final dataJson = nativeResponse.bodyAsJsonObject;
-
-      // Retrieve sample values from either Result or NativeHttpResponse object
-      final headerName = "Date";
-      final nativeResponse = NativeHttpResponse.fromMap(response);
-      String? header = nativeResponse.headers?[headerName];
-      if (header != null && header.isNotEmpty) {
-        print(
-          "Retrieved header from Login Response: \n\tkey=$headerName\n\tvalue=$header",
-        );
-      }
-
-      // Retrieve statusCode
-      int? statusCode = nativeResponse.statusCode;
-
-      // Retrieve body data ...
-      // If body is a valid utf8 String
-      final bodyString = nativeResponse.bodyAsString
-
-      // If body is valid json
-      final dynamic jsonObject = nativeResponse.bodyAsJsonObject;
-     // Deal appropriately with JSON Data
-
-
-
-
-    } on PlatformException {
-      // Deal appropriately with PlatformException
-    } catch (error) {
-      // Deal appropriately with error
-    }
-  }
-
-// Sample FileStream Upload (See Example project in this plugin for more information)
-Future<void> uploadFileStream(String filesize) async {
-  File file = await getFileToUpload(filesize);
-  String filename = file.path.split(Platform.pathSeparator).last;
-
-    builder = MultipartHelper(filename);
-
-    String contentTypeHeader =
-        'multipart/form-data; boundary=${builder.boundary}';
-    int contentLength = await builder.calculateContentLength(file);
-
-    final dynamic args = {
-      'url': relayServerUrl,
-      'pathnamePrefix': <optionalPathnamePrefix>,
-      'route': "/api/files/upload", // route will be encrypted
-      'method': 'POST',
-      'headers': {
-        'Content-Type': contentTypeHeader,
-        'Content-Length': contentLength.toString(),
-      },
-      'headersToEncrypt': headersToEncrypt,
-    };
-
-    String result = await _mteRelayClientPlugin.relayUploadFile(args);
-  // FileStream upload response will be returned via the relayStreamResponse callback above 
-}
-
- // Sample FileStream download. (See Example project for more information)
-Future<void> downloadFileStream() async {
-  final urlEncodedFilename = Uri.encodeComponent(<lastUpload>);
-  final downloadLocation = await getDownloadUrl(lastUpload);
-  print("Download Location:\n$downloadLocation");
-  try {
-      final arguments = {
-        'url': relayServerUrl,
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-        'route': "/api/files/download/stream/$urlEncodedFilename", // route will be encrypted
-        'method': 'GET',
-        'headers': {'Content-Type': 'application/json'},
-        'headersToEncrypt': headersToEncrypt,
-        'downloadLocation': downloadLocation,
-      };
-      String result = await _mteRelayClientPlugin.relayDownloadFile(arguments);
-    // FileStream download response will be returned via the relayStreamResponse callback above 
-  } catch (error) {
-    // Deal with Exception appropriately
-  }
-}
-// If a network call through MteRelay fails due to a MteRelay issue, an automatic RePair/Retry will occur one time. This method provides a manual way to rePair is necessary.
-  Future<void> rePair() async {
-    try {
-      final dynamic args = {
-        'url': relayServerUrl,
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-      };
-      String result = await _mteRelayClientPlugin.rePair(args);
-     // Deal with result appropriately
-    } catch (error) {
-      // Deal with Exception appropriately
-    }
-  }
-
-// If the current MteRelay defaults are not appropriate for your needs, they can be adjusted using the following method. An automatic RePair is included so that future transmissions during this session will use the updated settings. 
-// If you wish to alway use settings different than the defaults, simply call this method just after initializeRelay call above.
-  Future<void> adjustRelaySettings() async {
-    String result = "No result";
-    try {
-      final dynamic args = {
-        'url': relayServerUrl,
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-        // Any following argument not included or that is the same as the existing RelaySetting is disregarded
-        'streamChunkSize': 1024 * 1024, // current default is 1024 * 1024
-        'pairPoolSize': 3, // current default is 3
-        'persistPairs': false, // current default is false
-      };
-      String result = await _mteRelayClientPlugin.adjustRelaySettings(args);
-      // Deal with result appropriately
-    } catch (error) {
-      // Deal with Exception appropriately
-    }
-  }
-
-  // Sample Native logging calls
-  Future<void> enableFileLogging(bool isEnabled) async {
-    try {
-      final dynamic args = {
-        'url': relayServerUrl,
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-        'isEnabled': isEnabled,
-      };
-      String result = await _mteRelayClientPlugin.enableFileLogging(args);
-      // Deal with result appropriately
-    } catch (error) {
-      _showResult(false, "Error: $error");
-    }
-  }
-
-  Future<void> readLogFile() async {
-    try {
-      final dynamic args = {
-        'url': relayServerUrl,
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-      };
-      String result = await _mteRelayClientPlugin.readLogFile(args);
-      // Deal with result appropriately
-    } catch (error) {
-      // Deal with Exception appropriately
-    }
-  }
-
-  Future<void> clearLogFile() async {
-    try {
-       final dynamic args = {
-        'url': relayServerUrl,
-        'pathnamePrefix': <optionalPathnamePrefix>, // if your architecture requires it. PathnamePrefix will not be encrypted.
-      };
-      String result = await _mteRelayClientPlugin.clearLogFile(args);
-      // Deal with result appropriately
-    } catch (error) {
-      // Deal with Exception appropriately
-    }
-  }
 ```
 
+---
+
+## Response Handling
+
+The plugin provides two classes for handling responses. Choose based on your needs:
+
+| Class | Body Data Type | Best For |
+|-------|----------------|----------|
+| `Result<T>` | `T?` (generic) | Flexible data handling, when you want type inference |
+| `NativeHttpResponse` | `Uint8List?` | When you need raw bytes directly |
+
+Both classes provide these common properties:
+- `isSuccess` - Boolean indicating if the request succeeded
+- `statusCode` - HTTP status code (e.g., 200, 404)
+- `headers` - Response headers as `Map<String, String>?`
+- `errorMessage` - Error description if request failed
+- `bodyAsString` - Convenience getter to convert body to String
+- `bodyAsJsonObject` - Convenience getter to parse body as JSON
+
+### Option 1: Using Result<T>
+
+```dart
+// Parse the response map into a Result object
+final result = Result.fromMap(response);
+
+// Check for errors
+if (!result.isSuccess) {
+  print('Error: ${result.errorMessage}');
+  return;
+}
+
+// Access the response data
+final bodyString = result.bodyAsString;        // Body as String (empty if null)
+final bodyJson = result.bodyAsJsonObject;      // Body as parsed JSON (null if invalid)
+int? statusCode = result.statusCode;           // HTTP status code
+String? dateHeader = result.headers?['Date'];  // Access specific header
+```
+
+### Option 2: Using NativeHttpResponse
+
+```dart
+// Parse the response map into a NativeHttpResponse object  
+final nativeResponse = NativeHttpResponse.fromMap(response);
+
+// Check for errors
+if (!nativeResponse.isSuccess) {
+  print('Error: ${nativeResponse.errorMessage}');
+  return;
+}
+
+// Access the response data (body is Uint8List?)
+Uint8List rawBytes = nativeResponse.safeData;         // Body as bytes (empty if null)
+final dataString = nativeResponse.bodyAsString;       // Body as String
+final dataJson = nativeResponse.bodyAsJsonObject;     // Body as parsed JSON
+
+// Access metadata
+int? statusCode = nativeResponse.statusCode;
+String? dateHeader = nativeResponse.headers?['Date'];
+```
+
+### Complete Example
+
+```dart
+Future<void> login() async {
+  final body = jsonEncode({"email": "user@example.com", "password": "P@ssw0rd!"});
+  
+  try {
+    final args = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,
+      'route': "/api/login",
+      'method': 'POST',
+      'headers': {'Content-Type': 'application/json'},
+      'headersToEncrypt': ['Content-Type'],
+      'body': body,
+    };
+    
+    Map<dynamic, dynamic> response = await _mteRelayClientPlugin.relayDataTask(args);
+    
+    final result = Result.fromMap(response);
+    
+    if (result.isSuccess) {
+      final jsonData = result.bodyAsJsonObject;
+      print('Login successful: $jsonData');
+    } else {
+      print('Login failed: ${result.errorMessage}');
+    }
+    
+  } on PlatformException catch (e) {
+    print('Platform error: ${e.message}');
+  } catch (error) {
+    print('Unexpected error: $error');
+  }
+}
+
+---
+
+## API Reference
+
+### File Stream Upload
+
+For large file uploads, use streaming to avoid memory issues:
+
+```dart
+// Sample FileStream Upload
+// See the Example project in this plugin for complete implementation including MultipartHelper class
+Future<void> uploadFileStream(String filesize) async {
+  File file = await getFileToUpload(filesize);  // Your method to get the file
+  String filename = file.path.split(Platform.pathSeparator).last;
+
+  // MultipartHelper is provided in the Example project's lib/multipart_helper.dart
+  builder = MultipartHelper(filename);
+
+  String contentTypeHeader =
+      'multipart/form-data; boundary=${builder.boundary}';
+  int contentLength = await builder.calculateContentLength(file);
+
+  final dynamic args = {
+    'url': relayServerUrl,
+    'pathnamePrefix': null,  // Optional: unencrypted path prefix
+    'route': "/api/files/upload",  // This route WILL be encrypted
+    'method': 'POST',
+    'headers': {
+      'Content-Type': contentTypeHeader,
+      'Content-Length': contentLength.toString(),
+    },
+    'headersToEncrypt': headersToEncrypt,
+  };
+
+  String result = await _mteRelayClientPlugin.relayUploadFile(args);
+  // Response arrives via relayStreamResponseStream callback (set up in Step 5)
+}
+```
+
+### File Stream Download
+
+```dart
+// Sample FileStream download
+Future<void> downloadFileStream() async {
+  String filename = "example.pdf";  // The filename to download
+  final urlEncodedFilename = Uri.encodeComponent(filename);
+  final downloadLocation = await getDownloadLocation(filename);  // Your method to get save path
+  
+  print("Download Location: $downloadLocation");
+  
+  try {
+    final arguments = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,  // Optional: unencrypted path prefix
+      'route': "/api/files/download/stream/$urlEncodedFilename",  // Encrypted route
+      'method': 'GET',
+      'headers': {'Content-Type': 'application/json'},
+      'headersToEncrypt': headersToEncrypt,
+      'downloadLocation': downloadLocation,  // Local path where file will be saved
+    };
+    
+    String result = await _mteRelayClientPlugin.relayDownloadFile(arguments);
+    // Response arrives via relayStreamResponseStream callback
+  } catch (error) {
+    print('Download failed: $error');
+  }
+}
+```
+
+### Manual Re-Pairing
+
+If a network call fails due to an MteRelay issue, automatic re-pair/retry occurs once. Use this method for manual re-pairing:
+
+```dart
+Future<void> rePair() async {
+  try {
+    final dynamic args = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,  // Optional: unencrypted path prefix
+    };
+    String result = await _mteRelayClientPlugin.rePair(args);
+    print('Re-pair result: $result');
+  } catch (error) {
+    print('Re-pair failed: $error');
+  }
+}
+```
+
+### Adjusting Relay Settings
+
+Customize MteRelay settings if defaults don't fit your needs. Call this right after `initializeRelay()` to always use custom settings:
+
+```dart
+Future<void> adjustRelaySettings() async {
+  try {
+    final dynamic args = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,  // Optional: unencrypted path prefix
+      // Only include settings you want to change; others keep current values
+      'streamChunkSize': 1024 * 1024,  // Chunk size for streaming (default: 1MB)
+      'pairPoolSize': 3,               // Number of MTE pairs to maintain (default: 3)
+      'persistPairs': false,           // Save pairs across app restarts (default: false)
+    };
+    String result = await _mteRelayClientPlugin.adjustRelaySettings(args);
+    print('Settings adjusted: $result');
+  } catch (error) {
+    print('Failed to adjust settings: $error');
+  }
+}
+```
+
+> 💡 **Note:** Adjusting settings triggers an automatic re-pair so future transmissions use the new configuration.
+
+### Native Logging
+
+Enable file logging for debugging MteRelay operations:
+
+```dart
+// Enable or disable file logging
+Future<void> enableFileLogging(bool isEnabled) async {
+  try {
+    final dynamic args = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,
+      'isEnabled': isEnabled,
+    };
+    String result = await _mteRelayClientPlugin.enableFileLogging(args);
+    print('Logging ${isEnabled ? "enabled" : "disabled"}: $result');
+  } catch (error) {
+    print('Failed to toggle logging: $error');
+  }
+}
+
+// Read the current log file contents
+Future<void> readLogFile() async {
+  try {
+    final dynamic args = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,
+    };
+    String result = await _mteRelayClientPlugin.readLogFile(args);
+    print('Log contents:\n$result');
+  } catch (error) {
+    print('Failed to read log: $error');
+  }
+}
+
+// Clear the log file
+Future<void> clearLogFile() async {
+  try {
+    final dynamic args = {
+      'url': relayServerUrl,
+      'pathnamePrefix': null,
+    };
+    String result = await _mteRelayClientPlugin.clearLogFile(args);
+    print('Log cleared: $result');
+  } catch (error) {
+    print('Failed to clear log: $error');
+  }
+}
+```
+
+---
+
+## Troubleshooting
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `PlatformException` | Native code issue | Check that iOS/Android native setup is complete |
+| `Failed to initialize Relay` | Server unreachable | Verify your `relayServerUrl` is correct and server is running |
+| `MteRelay server not found` | Pairing failed | Check network connectivity and server configuration |
+| Build fails on iOS | CocoaPods issue | See [iOS Integration Guide](iosIntegrationGuide.md) |
+
+### Need More Help?
+
+Refer to the **Example project** included in this plugin for complete, working implementations of all features.
+
+---
 
 <div style="page-break-after: always; break-after: page;"></div>
 

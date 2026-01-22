@@ -26,7 +26,7 @@ dependencies:
   mte_relay_client_plugin:
     git:
       url: https://github.com/Eclypses/mte-relay-client-flutter-pod.git
-      ref: 4.3.1
+      ref: 4.4.0
 
 
 
